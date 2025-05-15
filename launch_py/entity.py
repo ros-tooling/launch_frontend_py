@@ -13,35 +13,39 @@
 # limitations under the License.
 
 """Module for launch_py Entity class."""
+from typing import (
+    List,
+    Optional,
+    Set,
+    Text,
+    Union,
+)
 
-from typing import List
-from typing import Optional
-from typing import Text
-from typing import Union
-
-from launch.frontend import Entity as BaseEntity
+from launch.frontend.entity import Entity as BaseEntity
 from launch.frontend.type_utils import check_is_list_entity
-from launch.utilities.type_utils import AllowedTypesType
-from launch.utilities.type_utils import AllowedValueType
-from launch.utilities.type_utils import is_instance_of
+from launch.utilities.type_utils import (
+    AllowedTypesType,
+    AllowedValueType,
+    is_instance_of,
+)
 
 
 class Entity(BaseEntity):
-    """Single item in the intermediate YAML front_end representation."""
+    """Single item in the intermediate front_end representation."""
 
     def __init__(
-        self,
-        element: dict,
-        type_name: Text = None,
-        *,
-        parent: 'Entity' = None
-    ) -> Text:
+            self,
+            type_name: Text,
+            kwargs: dict,
+            *,
+            parent: Optional['Entity'] = None,
+    ) -> None:
         """Create an Entity."""
         self.__type_name = type_name
-        self.__element = element
+        self.__kwargs = kwargs
         self.__parent = parent
-        self.__read_keys = set()
         self.__children_called = False
+        self.__read_keys: Set[Text] = set()
 
     @property
     def type_name(self) -> Text:
@@ -54,48 +58,31 @@ class Entity(BaseEntity):
         return self.__parent
 
     @property
-    def children(self) -> List['Entity']:
+    def children(self) -> List[BaseEntity]:
         """Get the Entity's children."""
         self.__children_called = True
-        if not isinstance(self.__element, (dict, list)):
+        if not isinstance(self.__kwargs, (dict)):
             raise TypeError(
-                f'Expected a dict or list, got {type(self.element)}:'
-                f'\n---\n{self.__element}\n---'
+                f'Expected a dict, got {type(self.__kwargs)}:'
+                f'\n---\n{self.__kwargs}\n---'
             )
-        if isinstance(self.__element, dict):
-            if 'children' not in self.__element:
-                raise ValueError(
-                    f'Expected entity `{self.__type_name}` to have children entities.'
-                    f'That can be a list of subentities or a dictionary with a `children` '
-                    'list element')
-            self.__read_keys.add('children')
-            children = self.__element['children']
-        else:
-            children = self.__element
-        entities = []
-        for child in children:
-            if len(child) != 1:
-                raise RuntimeError(
-                    'Subentities must be a dictionary with only one key'
-                    ', which is the entity type')
-            type_name = list(child.keys())[0]
-            entities.append(Entity(child[type_name], type_name))
-        return entities
+
+        if 'children' not in self.__kwargs:
+            raise ValueError(
+                f'Expected entity `{self.__type_name}` to have children entities.')
+        self.__read_keys.add('children')
+
+        children: List[BaseEntity] = self.__kwargs['children']
+        return children
 
     def assert_entity_completely_parsed(self):
-        if isinstance(self.__element, list):
-            if not self.__children_called:
-                raise ValueError(
-                    f'Unexpected nested entity(ies) found in `{self.__type_name}`: '
-                    f'{self.__element}')
-            return
-        unparsed_keys = set(self.__element.keys()) - self.__read_keys
+        unparsed_keys = set(self.__kwargs.keys()) - self.__read_keys
         if unparsed_keys:
             raise ValueError(
                 f'Unexpected key(s) found in `{self.__type_name}`: {unparsed_keys}'
             )
 
-    def get_attr(
+    def get_attr(  # type: ignore[override]
         self,
         name: Text,
         *,
@@ -113,7 +100,7 @@ class Entity(BaseEntity):
         `launch_yaml` does not apply type coercion,
         it only checks if the read value is of the correct type.
         """
-        if name not in self.__element:
+        if name not in self.__kwargs:
             if not optional:
                 raise AttributeError(
                     "Can not find attribute '{}' in Entity '{}'".format(
@@ -121,10 +108,10 @@ class Entity(BaseEntity):
             else:
                 return None
         self.__read_keys.add(name)
-        data = self.__element[name]
+        data = self.__kwargs[name]
         if check_is_list_entity(data_type):
             if isinstance(data, list) and isinstance(data[0], dict):
-                return [Entity(child, name) for child in data]
+                return [Entity(name, child) for child in data]
             raise TypeError(
                 "Attribute '{}' of Entity '{}' expected to be a list of dictionaries.".format(
                     name, self.type_name
@@ -137,3 +124,7 @@ class Entity(BaseEntity):
                 )
             )
         return data
+
+    def __repr__(self) -> str:
+        """Return a string representation of the Entity."""
+        return f'Entity(type_name={self.__type_name}, kwargs={self.__kwargs})'
