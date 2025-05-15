@@ -69,21 +69,11 @@ class Entity(BaseEntity):
 
         if 'children' not in self.__kwargs:
             raise ValueError(
-                f'Expected entity `{self.__type_name}` to have children entities.'
-                f'That can be a list of subentities or a dictionary with a `children` '
-                'list element')
+                f'Expected entity `{self.__type_name}` to have children entities.')
         self.__read_keys.add('children')
 
-        children = self.__kwargs['children']
-        entities: List[BaseEntity] = []
-        for child in children:
-            if len(child) != 1:
-                raise RuntimeError(
-                    'Subentities must be a dictionary with only one key'
-                    ', which is the entity type')
-            type_name = list(child.keys())[0]
-            entities.append(Entity(type_name, child[type_name]))
-        return entities
+        children: List[BaseEntity] = self.__kwargs['children']
+        return children
 
     def assert_entity_completely_parsed(self):
         unparsed_keys = set(self.__kwargs.keys()) - self.__read_keys
@@ -134,3 +124,7 @@ class Entity(BaseEntity):
                 )
             )
         return data
+
+    def __repr__(self) -> str:
+        """Return a string representation of the Entity."""
+        return f'Entity(type_name={self.__type_name}, kwargs={self.__kwargs})'
