@@ -12,16 +12,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from launch import LaunchDescription
-from launch.frontend.expose import action_parse_methods
+from typing import List
 
-launch = LaunchDescription
+from launch.frontend.expose import action_parse_methods
+from launch.frontend.parser import Parser
+from launch.launch_description import LaunchDescription
+
+from .entity import Entity
+
+
+def launch(actions: List[Entity]) -> LaunchDescription:
+    parser = Parser()
+    root_entity = Entity('launch', {'children': actions})
+    return parser.parse_description(root_entity)
+
 
 def make_action(action_name):
-    def impl():
-        return f'Action: {action_name}'
+    def impl(**kwargs):
+        return Entity(action_name, kwargs)
     globals()[action_name] = impl
     return impl
+
 
 exposed_actions = [
     make_action(key) for key in action_parse_methods.keys()

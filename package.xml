@@ -14,11 +14,9 @@
   <depend>launch</depend>
 
   <test_depend>ament_copyright</test_depend>
-  <test_depend>ament_flake8</test_depend>
-  <test_depend>ament_pep257</test_depend>
-  <test_depend>ament_mypy</test_depend>
   <test_depend>ament_lint_auto</test_depend>
-  <test_depend>ament_xmllint</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+  <test_depend>ament_cmake_mypy</test_depend>
   <test_depend>python3-pytest</test_depend>
 
   <member_of_group>launch_frontend_packages</member_of_group>
