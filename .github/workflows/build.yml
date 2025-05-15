@@ -32,7 +32,6 @@ jobs:
       - uses: ros-tooling/action-ros-ci@v0.4
         with:
           target-ros2-distro: ${{ matrix.ros }}
-          vcs-repo-file-url: /tmp/deps.repos
           package-name: launch_py
       - uses: actions/upload-artifact@v4
         with:
