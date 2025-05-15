@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List
+import importlib
+from typing import Any, List
 
 from launch.frontend.expose import action_parse_methods
 from launch.frontend.parser import Parser
@@ -41,3 +42,11 @@ exposed_actions = [
 __all__ = [
     'launch',
 ] + exposed_actions
+
+
+def __getattr__(name: str) -> Any:
+    # This is a workaround to silence mypy complaint about attributes that are created dynamically
+    try:
+        return importlib.import_module(f'.{name}', __name__)
+    except ModuleNotFoundError as e:
+        raise AttributeError(f'module {__name__} has no attribute {name}') from e
