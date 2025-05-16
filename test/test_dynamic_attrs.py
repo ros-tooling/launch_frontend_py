@@ -65,6 +65,12 @@ def test_dynamic_create():
     assert actions.foo.__name__ == 'foo'
     assert actions.foo().type_name == 'foo'
 
+    with pytest.raises(AttributeError):
+        actions.node
+
+    import launch_ros  # noqa: F401
+    assert actions.node().type_name == 'node'
+
 
 # def test_bultin_suffix():
 #     assert actions.while_.__name__ == 'while_'
