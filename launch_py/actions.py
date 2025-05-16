@@ -12,20 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import builtins
-import keyword
 from typing import Any, Callable
 
 from launch.frontend.expose import action_parse_methods
 
-from .entity import Entity
+from .entity import Entity, is_reserved_identifier
 
 __all__ = []
-
-
-def is_reserved_identifier(name: str) -> bool:
-    """Check if a name is a reserved identifier in Python."""
-    return keyword.iskeyword(name) or name in dir(builtins)
 
 
 def make_action_factory(action_name: str, **kwargs) -> Callable[..., Entity]:
