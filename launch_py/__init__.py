@@ -12,13 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import importlib
-from typing import Any, List
+from typing import List
 
-from launch.frontend.expose import action_parse_methods
 from launch.frontend.parser import Parser
 from launch.launch_description import LaunchDescription
 
+from . import actions
 from .entity import Entity
 
 
@@ -28,25 +27,7 @@ def launch(actions: List[Entity]) -> LaunchDescription:
     return parser.parse_description(root_entity)
 
 
-def make_action(action_name):
-    def impl(**kwargs):
-        return Entity(action_name, kwargs)
-    globals()[action_name] = impl
-    return impl
-
-
-exposed_actions = [
-    make_action(key) for key in action_parse_methods.keys()
-]
-
 __all__ = [
     'launch',
-] + exposed_actions
-
-
-def __getattr__(name: str) -> Any:
-    # This is a workaround to silence mypy complaint about attributes that are created dynamically
-    try:
-        return importlib.import_module(f'.{name}', __name__)
-    except ModuleNotFoundError as e:
-        raise AttributeError(f'module {__name__} has no attribute {name}') from e
+    'actions',
+]

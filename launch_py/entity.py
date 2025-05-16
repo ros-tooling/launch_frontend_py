@@ -13,6 +13,8 @@
 # limitations under the License.
 
 """Module for launch_py Entity class."""
+import builtins
+import keyword
 from typing import (
     List,
     Optional,
@@ -30,6 +32,11 @@ from launch.utilities.type_utils import (
 )
 
 
+def is_reserved_identifier(name: str) -> bool:
+    """Check if a name is a reserved identifier in Python."""
+    return keyword.iskeyword(name) or name in dir(builtins)
+
+
 class Entity(BaseEntity):
     """Single item in the intermediate front_end representation."""
 
@@ -44,7 +51,6 @@ class Entity(BaseEntity):
         self.__type_name = type_name
         self.__kwargs = kwargs
         self.__parent = parent
-        self.__children_called = False
         self.__read_keys: Set[Text] = set()
 
     @property
@@ -60,7 +66,6 @@ class Entity(BaseEntity):
     @property
     def children(self) -> List[BaseEntity]:
         """Get the Entity's children."""
-        self.__children_called = True
         if not isinstance(self.__kwargs, (dict)):
             raise TypeError(
                 f'Expected a dict, got {type(self.__kwargs)}:'
@@ -97,8 +102,7 @@ class Entity(BaseEntity):
         Access an attribute of the entity.
 
         See :py:meth:`launch.frontend.Entity.get_attr`.
-        `launch_yaml` does not apply type coercion,
-        it only checks if the read value is of the correct type.
+        Does not apply type coercion, only checks if the read value is of the correct type.
         """
         if name not in self.__kwargs:
             if not optional:
@@ -112,6 +116,8 @@ class Entity(BaseEntity):
         if check_is_list_entity(data_type):
             if isinstance(data, list) and isinstance(data[0], dict):
                 return [Entity(name, child) for child in data]
+            elif isinstance(data, list) and isinstance(data[0], Entity):
+                return data
             raise TypeError(
                 "Attribute '{}' of Entity '{}' expected to be a list of dictionaries.".format(
                     name, self.type_name
