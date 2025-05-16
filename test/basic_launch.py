@@ -11,9 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from pathlib import Path
 
 from launch_py import launch
-from launch_py.actions import arg, executable, group, let, log, set_env
+from launch_py.actions import arg, executable, group, include, let, log, set_env
+
+THIS_DIR = Path(__file__).parent
 
 
 def generate_launch_description():
@@ -35,4 +38,10 @@ def generate_launch_description():
             ]
         ),
         log(level='ERROR', message='Outside group: env MY_ENV_VAR=$(env MY_ENV_VAR "<unset>")'),
+        include(
+            file=f'{THIS_DIR}/include_launch.py',
+            arg=[
+                arg(name='foo', value='True'),
+            ],
+        ),
     ])

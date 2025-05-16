@@ -112,6 +112,8 @@ class Entity(BaseEntity):
         if check_is_list_entity(data_type):
             if isinstance(data, list) and isinstance(data[0], dict):
                 return [Entity(name, child) for child in data]
+            elif isinstance(data, list) and isinstance(data[0], Entity):
+                return data
             raise TypeError(
                 "Attribute '{}' of Entity '{}' expected to be a list of dictionaries.".format(
                     name, self.type_name
