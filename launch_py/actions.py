@@ -14,37 +14,53 @@
 
 from typing import Any, Callable
 
-from launch.frontend.expose import action_parse_methods
-
 from .entity import Entity, is_reserved_identifier
 
 __all__ = []
 
 
-def make_action_factory(action_name: str, **kwargs) -> Callable[..., Entity]:
+def make_action_factory(action_name: str, **kwargs) -> Callable[..., Any]:
     # Create a factory function for each action entity
-    def fn(**kwargs):
-        return Entity(action_name, kwargs)  # noqa: F821
+    if is_reserved_identifier(action_name):
+        action_name += '_'
 
-    # fn = FunctionType(impl_template.__code__, globals(), name=action_name)
+    def fn(**kwargs):
+        return Entity(action_name, kwargs)
+
     fn.__doc__ = f'launch_py action: {action_name} (dynamically generated)'
     fn.__name__ = action_name
     fn.__qualname__ = action_name
     fn.__module__ = __name__
+    globals()[action_name] = fn
+    __all__.append(action_name)
     return fn
 
 
-for action_name in action_parse_methods.keys():
-    if is_reserved_identifier(action_name):
-        action_name += '_'
-    fn = make_action_factory(action_name)
-    globals()[action_name] = fn
-    __all__.append(action_name)
+def preseed_all_actions() -> None:
+    """Pre-seed all actions in the module."""
+    from launch.frontend.expose import action_parse_methods
+
+    for action_name in action_parse_methods.keys():
+        make_action_factory(action_name)
 
 
 def __getattr__(name: str) -> Any:
-    # This is a workaround for mypy complaint about dynamically created attrs
+    from launch.frontend.expose import action_parse_methods
     import importlib
+
+    # If it's already been created, return
     if name in __all__:
         return importlib.import_module(f'.{name}', __name__)
-    raise AttributeError(f'module {__name__} has no attribute {name}')
+
+    # If not, perhaps it was exposed later or not accessed yet
+    base_name = name[:-1] if name.endswith('_') else name
+    if base_name in action_parse_methods:
+        return make_action_factory(name)
+    else:
+        msg = f'module {__name__} has no attribute "{name}"'
+        if base_name != name:
+            msg += ' (or "{base_name}")'
+        raise AttributeError(msg)
+
+
+preseed_all_actions()
