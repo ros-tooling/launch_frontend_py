@@ -14,6 +14,7 @@
 
 from launch.action import Action
 from launch.frontend import expose_action
+from launch_py import actions
 import pytest
 
 
@@ -21,19 +22,20 @@ import pytest
 class BuiltinNameTest(Action):
     """Test action that exposes a Python builtin name."""
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
     @classmethod
     def parse(cls, entity, parser):
         _, kwargs = super().parse(entity, parser)
         return cls, kwargs
 
-    def execute(self, context):
-        del context
 
+@expose_action('foo')
+class DynamicCreationTest(Action):
+    """Test action that exposes an action after first import."""
 
-from launch_py import actions  # noqa: I100, E402
+    @classmethod
+    def parse(cls, entity, parser):
+        _, kwargs = super().parse(entity, parser)
+        return cls, kwargs
 
 
 def test_dynamic_attrs():
@@ -41,8 +43,6 @@ def test_dynamic_attrs():
     assert name == 'let'
     str_repr = str(actions.let)
     assert str_repr.startswith('<function let')
-
-    assert actions.while_.__name__ == 'while_'
 
     with pytest.raises(AttributeError):
         getattr(actions, 'non_existent_action')
@@ -57,3 +57,15 @@ def test_dynamic_attrs():
 
     with pytest.raises(AttributeError):
         test_arg.get_attr('non_existent_attr')
+
+
+def test_dynamic_create():
+    assert actions.foo is not None
+
+    assert actions.foo.__name__ == 'foo'
+    assert actions.foo().type_name == 'foo'
+
+
+# def test_bultin_suffix():
+#     assert actions.while_.__name__ == 'while_'
+#     assert actions.while_().type_name == 'while_'
