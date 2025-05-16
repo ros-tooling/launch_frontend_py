@@ -12,14 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from launch_py import launch
-from launch_py.actions import executable
+from launch_py import actions
+import pytest
 
 
-def generate_launch_description():
-    return launch([
-        executable(
-            cmd='echo hello launch_py, my share dir is $(find-pkg-share launch_py)',
-            output='screen',
-        ),
-    ])
+def test_dynamic_attrs():
+    name = actions.let.__name__
+    assert name == 'let'
+    str_repr = str(actions.let)
+    assert str_repr.startswith('<function let')
+
+    assert actions.for_.__name__ == 'for_'
+
+    with pytest.raises(AttributeError):
+        getattr(actions, 'non_existent_action')
