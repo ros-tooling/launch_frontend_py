@@ -14,8 +14,7 @@
 
 import builtins
 import keyword
-from types import FunctionType
-from typing import Any
+from typing import Any, Callable
 
 from launch.frontend.expose import action_parse_methods
 
@@ -29,19 +28,23 @@ def is_reserved_identifier(name: str) -> bool:
     return keyword.iskeyword(name) or name in dir(builtins)
 
 
-for action_name in action_parse_methods.keys():
-    if is_reserved_identifier(action_name):
-        action_name += '_'
-
+def make_action_factory(action_name: str, **kwargs) -> Callable[..., Entity]:
     # Create a factory function for each action entity
-    def impl_template(**kwargs):
+    def fn(**kwargs):
         return Entity(action_name, kwargs)  # noqa: F821
 
-    fn = FunctionType(impl_template.__code__, globals(), name=action_name)
+    # fn = FunctionType(impl_template.__code__, globals(), name=action_name)
     fn.__doc__ = f'launch_py action: {action_name} (dynamically generated)'
     fn.__name__ = action_name
     fn.__qualname__ = action_name
     fn.__module__ = __name__
+    return fn
+
+
+for action_name in action_parse_methods.keys():
+    if is_reserved_identifier(action_name):
+        action_name += '_'
+    fn = make_action_factory(action_name)
     globals()[action_name] = fn
     __all__.append(action_name)
 

@@ -26,3 +26,14 @@ def test_dynamic_attrs():
 
     with pytest.raises(AttributeError):
         getattr(actions, 'non_existent_action')
+
+    test_group = actions.group()
+    assert test_group.type_name == 'group'
+
+    test_arg = actions.arg(name='argname', default='argvalue')
+    assert test_arg.type_name == 'arg'
+    assert test_arg.get_attr('name') == 'argname'
+    assert test_arg.get_attr('default') == 'argvalue'
+
+    with pytest.raises(AttributeError):
+        test_arg.get_attr('non_existent_attr')

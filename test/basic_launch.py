@@ -13,13 +13,26 @@
 # limitations under the License.
 
 from launch_py import launch
-from launch_py.actions import executable
+from launch_py.actions import arg, executable, group, let, log, set_env
 
 
 def generate_launch_description():
     return launch([
+        arg(name='arg1', default='arg1_value'),
+        let(name='arg2', value='let_$(var arg1)'),
         executable(
-            cmd='echo hello launch_py, my share dir is $(find-pkg-share launch_py)',
+            cmd='echo hello launch_py executable',
             output='screen',
         ),
+        log(level='INFO', message='Log warning: arg1=$(var arg1), arg2=$(var arg2)'),
+        group(
+            children=[
+                set_env(
+                    name='MY_ENV_VAR',
+                    value='my_value',
+                ),
+                log(level='WARNING', message='In group env MY_ENV_VAR=$(env MY_ENV_VAR)'),
+            ]
+        ),
+        log(level='ERROR', message='Outside group: env MY_ENV_VAR=$(env MY_ENV_VAR "<unset>")'),
     ])
