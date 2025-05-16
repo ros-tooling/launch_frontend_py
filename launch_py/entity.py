@@ -43,6 +43,7 @@ class Entity(BaseEntity):
     def __init__(
             self,
             type_name: Text,
+            args: list,
             kwargs: dict,
             *,
             parent: Optional['Entity'] = None,

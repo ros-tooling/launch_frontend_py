@@ -24,8 +24,8 @@ def make_action_factory(action_name: str, **kwargs) -> Callable[..., Any]:
     if is_reserved_identifier(action_name):
         action_name += '_'
 
-    def fn(**kwargs):
-        return Entity(action_name, kwargs)
+    def fn(*args, **kwargs):
+        return Entity(action_name, args, kwargs)
 
     fn.__doc__ = f'launch_py action: {action_name} (dynamically generated)'
     fn.__name__ = action_name
