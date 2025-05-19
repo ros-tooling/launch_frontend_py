@@ -43,15 +43,22 @@ class Entity(BaseEntity):
     def __init__(
             self,
             type_name: Text,
-            args: list,
-            kwargs: dict,
-            *,
-            parent: Optional['Entity'] = None,
+            *args: BaseEntity,
+            **kwargs,
     ) -> None:
         """Create an Entity."""
+        if args and kwargs:
+            raise ValueError(
+                'Entity cannot take both positional arguments and keyword arguments. '
+                f'Provided args={args}, kwargs={kwargs}. '
+                'To provide attributes & children, pass `children` kwarg with type list[Entity]')
+
+        if kwargs:
+            self.__attrs = kwargs
+        else:
+            self.__attrs = {'children': args}
+
         self.__type_name = type_name
-        self.__kwargs = kwargs
-        self.__parent = parent
         self.__read_keys: Set[Text] = set()
 
     @property
@@ -62,27 +69,21 @@ class Entity(BaseEntity):
     @property
     def parent(self) -> Optional['Entity']:
         """Get Entity parent."""
-        return self.__parent
+        return None
 
     @property
     def children(self) -> List[BaseEntity]:
         """Get the Entity's children."""
-        if not isinstance(self.__kwargs, (dict)):
-            raise TypeError(
-                f'Expected a dict, got {type(self.__kwargs)}:'
-                f'\n---\n{self.__kwargs}\n---'
-            )
-
-        if 'children' not in self.__kwargs:
+        if 'children' not in self.__attrs:
             raise ValueError(
                 f'Expected entity `{self.__type_name}` to have children entities.')
         self.__read_keys.add('children')
 
-        children: List[BaseEntity] = self.__kwargs['children']
+        children: List[BaseEntity] = self.__attrs['children']
         return children
 
     def assert_entity_completely_parsed(self):
-        unparsed_keys = set(self.__kwargs.keys()) - self.__read_keys
+        unparsed_keys = set(self.__attrs.keys()) - self.__read_keys
         if unparsed_keys:
             raise ValueError(
                 f'Unexpected key(s) found in `{self.__type_name}`: {unparsed_keys}'
@@ -105,7 +106,7 @@ class Entity(BaseEntity):
         See :py:meth:`launch.frontend.Entity.get_attr`.
         Does not apply type coercion, only checks if the read value is of the correct type.
         """
-        if name not in self.__kwargs:
+        if name not in self.__attrs:
             if not optional:
                 raise AttributeError(
                     "Can not find attribute '{}' in Entity '{}'".format(
@@ -113,10 +114,10 @@ class Entity(BaseEntity):
             else:
                 return None
         self.__read_keys.add(name)
-        data = self.__kwargs[name]
+        data = self.__attrs[name]
         if check_is_list_entity(data_type):
             if isinstance(data, list) and isinstance(data[0], dict):
-                return [Entity(name, child) for child in data]
+                return [Entity(name, **child) for child in data]
             elif isinstance(data, list) and isinstance(data[0], Entity):
                 return data
             raise TypeError(
@@ -134,4 +135,4 @@ class Entity(BaseEntity):
 
     def __repr__(self) -> str:
         """Return a string representation of the Entity."""
-        return f'Entity(type_name={self.__type_name}, kwargs={self.__kwargs})'
+        return f'Entity(type_name={self.__type_name}, attrs={self.__attrs})'

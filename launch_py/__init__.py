@@ -23,7 +23,7 @@ from .entity import Entity
 
 def launch(actions: List[Entity]) -> LaunchDescription:
     parser = Parser()
-    root_entity = Entity('launch', {'children': actions})
+    root_entity = Entity('launch', children=actions)
     return parser.parse_description(root_entity)
 
 

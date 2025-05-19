@@ -12,18 +12,43 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import pytest
+
 from launch_py.actions import group, log
 
 
 def test_kwarg_children():
-    g = group(children=[
-        log(level='info', message='list child'),
-    ])
+    g = group(
+        namespace='something',
+        children=[
+            log(level='info', message='list child'),
+        ]
+    )
     assert len(g.children) == 1
+    assert g.getattr('namespace') == 'something'
 
 
 def test_list_children():
     g = group([
-        log(level='info', message='list child')
+        log(level='info', message='list child'),
+        log(level='info', message='list child 2')
     ])
-    assert len(g.children) == 1
+    assert len(g.children) == 2
+
+
+def test_positional_children():
+    g = group(
+        log(level='info', message='positional child'),
+        log(level='info', message='positional child 2'),
+        log(level='info', message='positional child 3'),
+    )
+    assert len(g.children) == 3
+
+
+def test_bad_arg_combo():
+    with pytest.raises(ValueError):
+        g = group(
+            log(level='info', message='positional child'),
+            condition='Something'
+        )
+        assert g
