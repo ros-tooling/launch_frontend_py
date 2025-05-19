@@ -12,9 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pytest
-
 from launch_py.actions import group, log
+import pytest
 
 
 def test_kwarg_children():
@@ -25,7 +24,7 @@ def test_kwarg_children():
         ]
     )
     assert len(g.children) == 1
-    assert g.getattr('namespace') == 'something'
+    assert g.get_attr('namespace') == 'something'
 
 
 def test_list_children():
@@ -41,6 +40,19 @@ def test_positional_children():
         log(level='info', message='positional child'),
         log(level='info', message='positional child 2'),
         log(level='info', message='positional child 3'),
+    )
+    assert len(g.children) == 3
+
+
+def test_positional_lists():
+    g = group(
+        [
+            log(level='info', message='positional list 1 child 1'),
+            log(level='info', message='positional list 1 child 2'),
+        ],
+        [
+            log(level='info', message='positional list 2 child 1'),
+        ]
     )
     assert len(g.children) == 3
 

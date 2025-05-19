@@ -14,6 +14,7 @@
 
 """Module for launch_py Entity class."""
 import builtins
+from collections.abc import Iterable
 import keyword
 from typing import (
     List,
@@ -56,7 +57,13 @@ class Entity(BaseEntity):
         if kwargs:
             self.__attrs = kwargs
         else:
-            self.__attrs = {'children': args}
+            children: list[BaseEntity] = []
+            for child in args:
+                if isinstance(child, Iterable):
+                    children.extend(child)
+                else:
+                    children.append(child)
+            self.__attrs = {'children': children}
 
         self.__type_name = type_name
         self.__read_keys: Set[Text] = set()
