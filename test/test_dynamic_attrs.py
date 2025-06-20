@@ -14,7 +14,7 @@
 
 from launch.action import Action
 from launch.frontend import expose_action
-from launch_py import actions
+from launch_frontend_py import actions
 import pytest
 
 

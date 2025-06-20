@@ -7,7 +7,7 @@ That is, they are the intended user-facing API.
 However, much of the community got hooked on Python launchfiles due to early adoption when the frontends were incomplete.
 With that in mind, and the extensive explicit use of exact filenames and `PythonLaunchDescriptionSource`, migration to these frontends is difficult for packages with downstream consumers.
 
-Enter `launch_py` - this package provides a Python-language frontend to `launch`, with identical usage to the XML and YAML versions.
+Enter `launch_frontend_py` - this package provides a Python-language frontend to `launch`, with identical usage to the XML and YAML versions.
 It provides the same benefits of conciseness, declarative style, while allowing launchfiles to stay in Python.
 
 

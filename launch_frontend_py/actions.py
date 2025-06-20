@@ -27,7 +27,7 @@ def make_action_factory(action_name: str, **kwargs) -> Callable[..., Any]:
     def fn(*args, **kwargs):
         return Entity(action_name, *args, **kwargs)
 
-    fn.__doc__ = f'launch_py action: {action_name} (dynamically generated)'
+    fn.__doc__ = f'launch_frontend_py action: {action_name} (dynamically generated)'
     fn.__name__ = action_name
     fn.__qualname__ = action_name
     fn.__module__ = __name__

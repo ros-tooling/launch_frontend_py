@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(launch_py)
+project(launch_frontend_py)
 
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
