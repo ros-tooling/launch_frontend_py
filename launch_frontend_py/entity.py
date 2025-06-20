@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Module for launch_py Entity class."""
+"""Module for launch_frontend_py Entity class."""
 import builtins
 from collections.abc import Iterable
 import keyword

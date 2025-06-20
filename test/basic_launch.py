@@ -13,8 +13,8 @@
 # limitations under the License.
 from pathlib import Path
 
-from launch_py import launch
-from launch_py.actions import arg, executable, group, include, let, log, set_env
+from launch_frontend_py import launch
+from launch_frontend_py.actions import arg, executable, group, include, let, log, set_env
 
 THIS_DIR = Path(__file__).parent
 
@@ -24,7 +24,7 @@ def generate_launch_description():
         arg(name='arg1', default='arg1_value'),
         let(name='arg2', value='let_$(var arg1)'),
         executable(
-            cmd='echo hello launch_py executable',
+            cmd='echo hello launch_frontend_py executable',
             output='screen',
         ),
         log(level='INFO', message='Log warning: arg1=$(var arg1), arg2=$(var arg2)'),
