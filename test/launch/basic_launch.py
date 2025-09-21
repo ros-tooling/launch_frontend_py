@@ -18,10 +18,10 @@ from launch_frontend_py.actions import arg, log
 
 def generate_launch_description():
     return launch([
-        arg(name='foo'),
+        arg(name='foo', default='bar'),
         log(
             level='INFO',
-            message='I am an included launch file: foo=$(var foo)',
+            message='I am a launch file: foo=$(var foo)',
         ),
         # TODO(emerson) make if_ work
         # log(
