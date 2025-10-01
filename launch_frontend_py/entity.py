@@ -13,9 +13,7 @@
 # limitations under the License.
 
 """Module for launch_frontend_py Entity class."""
-import builtins
 from collections.abc import Iterable
-import keyword
 from typing import (
     List,
     Optional,
@@ -32,10 +30,7 @@ from launch.utilities.type_utils import (
     is_instance_of,
 )
 
-
-def is_reserved_identifier(name: str) -> bool:
-    """Check if a name is a reserved identifier in Python."""
-    return keyword.iskeyword(name) or name in dir(builtins)
+from .util import is_reserved_identifier
 
 
 class Entity(BaseEntity):
@@ -113,6 +108,10 @@ class Entity(BaseEntity):
         See :py:meth:`launch.frontend.Entity.get_attr`.
         Does not apply type coercion, only checks if the read value is of the correct type.
         """
+        # Reserved identifiers are all suffixed with an underscore
+        if is_reserved_identifier(name):
+            name += '_'
+
         if name not in self.__attrs:
             if not optional:
                 raise AttributeError(
