@@ -13,9 +13,7 @@
 # limitations under the License.
 
 """Module for launch_frontend_py Entity class."""
-import builtins
 from collections.abc import Iterable
-import keyword
 from typing import (
     List,
     Optional,
@@ -31,11 +29,6 @@ from launch.utilities.type_utils import (
     AllowedValueType,
     is_instance_of,
 )
-
-
-def is_reserved_identifier(name: str) -> bool:
-    """Check if a name is a reserved identifier in Python."""
-    return keyword.iskeyword(name) or name in dir(builtins)
 
 
 class Entity(BaseEntity):

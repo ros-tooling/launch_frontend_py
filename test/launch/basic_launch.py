@@ -20,4 +20,5 @@ def generate_launch_description():
     return launch([
         arg(name='message', default='hello world'),
         executable(cmd='echo $(var message)', output='both'),
+        # executable(cmd='echo conditional', if_=True),
     ])
