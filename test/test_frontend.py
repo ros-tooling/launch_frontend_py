@@ -15,8 +15,7 @@
 from pathlib import Path
 
 from launch import LaunchContext, LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, Log
-from launch.utilities import perform_substitutions
+from launch.actions import DeclareLaunchArgument, ExecuteProcess, IncludeLaunchDescription
 
 THIS_DIR = Path(__file__).parent
 
@@ -24,22 +23,26 @@ THIS_DIR = Path(__file__).parent
 def test_load_basic():
     context = LaunchContext()
 
-    include = IncludeLaunchDescription(THIS_DIR / 'launch' / 'basic_launch.py')
+    include = IncludeLaunchDescription(str(THIS_DIR / 'launch' / 'basic_launch.py'))
+    print(include)
     included_entities = include.get_sub_entities()
+    print(included_entities)
+    assert len(included_entities) == 1
+
     launch_desc = included_entities[0]
     assert isinstance(launch_desc, LaunchDescription)
 
     launchfile_entities = launch_desc.describe_sub_entities()
     assert len(launchfile_entities) == 2
 
+    # The first entity is a declare()
     should_be_declare = launchfile_entities[0]
-    should_be_log = launchfile_entities[1]
-
     assert isinstance(should_be_declare, DeclareLaunchArgument)
     should_be_declare.visit(context)
 
-    assert isinstance(should_be_log, Log)
-    should_be_log.visit(context)
+    # Second is executable()
+    should_be_exec = launchfile_entities[1]
+    assert isinstance(should_be_exec, ExecuteProcess)
 
-    msg = perform_substitutions(context, should_be_log.msg)
-    assert msg == 'I am a launch file: foo=bar'
+    should_be_exec.prepare(context)
+    assert should_be_exec.process_description.final_cmd == ['echo', 'hello world']
