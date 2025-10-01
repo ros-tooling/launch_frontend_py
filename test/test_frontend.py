@@ -15,35 +15,40 @@
 from pathlib import Path
 
 from launch.actions import DeclareLaunchArgument, ExecuteProcess, IncludeLaunchDescription
-from launch.launch_context import LaunchContext
 from launch.launch_description import LaunchDescription
+from launch.launch_service import LaunchService
 
 THIS_DIR = Path(__file__).parent
 
 
 def test_load_basic():
-    context = LaunchContext()
-
     include = IncludeLaunchDescription(str(THIS_DIR / 'launch' / 'basic_launch.py'))
-    print(include)
+
+    ls = LaunchService()
+    ld = LaunchDescription([include])
+    ls.include_launch_description(ld)
+
+    ls.context.launch_configurations['condition'] = 'False'
+    assert 0 == ls.run()
+
     included_entities = include.get_sub_entities()
-    print(included_entities)
     assert len(included_entities) == 1
 
     launch_desc = included_entities[0]
     assert isinstance(launch_desc, LaunchDescription)
 
     launchfile_entities = launch_desc.describe_sub_entities()
-    assert len(launchfile_entities) == 2
+    expected_types = (
+        DeclareLaunchArgument,
+        DeclareLaunchArgument,
+        ExecuteProcess,
+        ExecuteProcess,
+        ExecuteProcess,
+    )
+    assert len(launchfile_entities) == len(expected_types)
+    assert all(isinstance(e, t) for e, t in zip(launchfile_entities, expected_types))
 
-    # The first entity is a declare()
-    should_be_declare = launchfile_entities[0]
-    assert isinstance(should_be_declare, DeclareLaunchArgument)
-    should_be_declare.visit(context)
-
-    # Second is executable()
-    should_be_exec = launchfile_entities[1]
-    assert isinstance(should_be_exec, ExecuteProcess)
-
-    should_be_exec.prepare(context)
-    assert should_be_exec.process_description.final_cmd == ['echo', 'hello world']
+    assert launchfile_entities[2].process_description.final_cmd == ['echo', 'hello world']
+    assert launchfile_entities[3].process_description.final_cmd is None
+    assert launchfile_entities[4].process_description.final_cmd == [
+        'echo', 'hello', 'not-condition']

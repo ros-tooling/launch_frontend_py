@@ -12,15 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from launch_frontend_py import launch
-from launch_frontend_py.actions import arg, executable
+import builtins
+import keyword
 
 
-def generate_launch_description():
-    return launch([
-        arg(name='message', default='hello world'),
-        arg(name='condition', default='True'),
-        executable(cmd='echo $(var message)', output='both'),
-        executable(cmd='echo hello conditional', if_='$(var condition)', output='both'),
-        executable(cmd='echo hello not-condition', if_='$(not $(var condition))', output='both'),
-    ])
+def is_reserved_identifier(name: str) -> bool:
+    """
+    Check if a name is a reserved identifier in Python.
+
+    Used to avoid naming issues in the launch DSL that overlap with Python reserved words.
+    """
+    return keyword.iskeyword(name) or name in dir(builtins)

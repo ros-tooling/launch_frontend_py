@@ -30,6 +30,8 @@ from launch.utilities.type_utils import (
     is_instance_of,
 )
 
+from .util import is_reserved_identifier
+
 
 class Entity(BaseEntity):
     """Single item in the intermediate front_end representation."""
@@ -106,6 +108,10 @@ class Entity(BaseEntity):
         See :py:meth:`launch.frontend.Entity.get_attr`.
         Does not apply type coercion, only checks if the read value is of the correct type.
         """
+        # Reserved identifiers are all suffixed with an underscore
+        if is_reserved_identifier(name):
+            name += '_'
+
         if name not in self.__attrs:
             if not optional:
                 raise AttributeError(
