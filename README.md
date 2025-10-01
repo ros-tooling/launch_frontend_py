@@ -13,4 +13,25 @@ It provides the same benefits of conciseness, declarative style, while allowing 
 
 ## Usage
 
-TODO
+The available actions and substitutions are identical to XML and YAML launchfiles, with one caveat:
+
+> [!NOTE]
+> Some launch Actions and their attributes use reserved Python keywords, the known cases are `for` Action and `if` attribute for conditions.
+> For all cases, an underscore `_` is added at the end: `for_`, `if_`.
+
+Here is an example launchfile with a few features:
+
+```py
+from launch_frontend_py import launch
+from launch_frontend_py.actions import arg, executable
+
+
+def generate_launch_description():
+    return launch([
+        arg(name='message', default='hello world'),
+        arg(name='condition', default='True'),
+        executable(cmd='echo $(var message)', output='both'),
+        executable(cmd='echo hello conditional', if_='$(var condition)', output='both'),
+        executable(cmd='echo hello not-condition', if_='$(not $(var condition))', output='both'),
+    ])
+```
