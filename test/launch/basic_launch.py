@@ -13,25 +13,11 @@
 # limitations under the License.
 
 from launch_frontend_py import launch
-from launch_frontend_py.actions import arg, log
+from launch_frontend_py.actions import arg, executable
 
 
 def generate_launch_description():
     return launch([
-        arg(name='foo'),
-        log(
-            level='INFO',
-            message='I am an included launch file: foo=$(var foo)',
-        ),
-        # TODO(emerson) make if_ work
-        # log(
-        #     if_='$(var foo)',
-        #     level='INFO',
-        #     message='This conditional log only happened because foo is true',
-        # ),
-        # log(
-        #     if_='$(not $(var foo))',
-        #     level='INFO',
-        #     message='This conditional log only happened because foo is false',
-        # ),
+        arg(name='message', default='hello world'),
+        executable(cmd='echo $(var message)', output='both'),
     ])
