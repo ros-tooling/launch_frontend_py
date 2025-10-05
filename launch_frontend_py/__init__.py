@@ -25,7 +25,7 @@ __all__ = [
 
 
 def launch(actions: List[Entity]) -> LaunchDescription:
-    """Entrypoint of the launchfile, produces a LaunchDescription containing the listed entities."""
+    """Entrypoint of launchfile, produce a LaunchDescription of the provided entities."""
     parser = Parser()
     root_entity = Entity('launch', children=actions)
     return parser.parse_description(root_entity)
@@ -69,13 +69,13 @@ def __getattr__(name: str) -> Any:
     elif name.endswith('_'):
         # The name has a trailing underscore, which we add to actions with reserved Python names
         # Try again without the underscore
-        __getattr__(name[:-1])
+        try:
+            return __getattr__(name[:-1])
+        except AttributeError as e:
+            raise AttributeError(f'{e} (or "{name}")')
     else:
         # It's not registered, raise the usual error
-        msg = f'module {__name__} has no attribute "{name}"'
-        if base_name != name:
-            msg += ' (or "{base_name}")'
-        raise AttributeError(msg)
+        raise AttributeError(f'module {__name__} has no attribute "{name}"')
 
 
 def __preseed_all_actions() -> None:
@@ -94,5 +94,6 @@ def __preseed_all_actions() -> None:
     action_names = list(action_parse_methods.keys())
     for action_name in action_names:
         __getattr__(action_name)
+
 
 __preseed_all_actions()

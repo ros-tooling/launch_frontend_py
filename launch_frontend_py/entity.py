@@ -14,8 +14,8 @@
 
 """Module for launch_frontend_py Entity class."""
 import builtins
-import keyword
 from collections.abc import Iterable
+import keyword
 from typing import (
     List,
     Optional,
@@ -51,7 +51,6 @@ def make_valid_name(name: str) -> str:
     if is_reserved_identifier(name):
         return f'{name}_'
     return name
-
 
 
 class Entity(BaseEntity):
