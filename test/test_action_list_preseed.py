@@ -20,4 +20,4 @@ def test_action_list_preseed():
     # already filled where possible without explicit access
     # picking a representative subset of actions (that are present in Humble+)
     for x in ['arg', 'timer', 'executable', 'let', 'group', 'include', 'set_env']:
-        assert x in launch_frontend_py.actions.__all__
+        assert x in launch_frontend_py.__all__

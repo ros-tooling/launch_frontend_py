@@ -14,7 +14,7 @@
 
 from launch.action import Action
 from launch.frontend import expose_action
-from launch_frontend_py import actions
+import launch_frontend_py as actions
 import pytest
 
 
@@ -32,24 +32,47 @@ class BuiltinNameTest(Action):
 class DynamicCreationTest(Action):
     """Test action that exposes an action after first import."""
 
+    def __init__(self, value, **kwargs) -> None:
+        super().__init__(**kwargs)
+        self.value = value
+
     @classmethod
     def parse(cls, entity, parser):
         _, kwargs = super().parse(entity, parser)
+        kwargs['value'] = kwargs.get('value', None)
         return cls, kwargs
 
 
-def test_dynamic_attrs():
-    name = actions.let.__name__
-    assert name == 'let'
-    str_repr = str(actions.let)
+def test_action_getattr():
+    group = actions.group
+    assert group.__name__ == 'group'
+    test_group = group()
+    assert test_group.type_name == 'group'
+
+
+def test_action_import():
+    from launch_frontend_py import let
+    assert let.__name__ == 'let'
+    str_repr = str(let)
     assert str_repr.startswith('<function let')
 
+    x = let(name='test_name', value='test_value')
+    assert x.get_attr('name') == 'test_name'
+    assert x.get_attr('value') == 'test_value'
+
+
+def test_invalid_action_raise():
     with pytest.raises(AttributeError):
         getattr(actions, 'non_existent_action')
 
-    test_group = actions.group()
-    assert test_group.type_name == 'group'
+    with pytest.raises(AttributeError):
+        _ = actions.other_nonexistent
 
+    with pytest.raises(ImportError):
+        import launch_frontend_py.non_existent_import  # noqa: F401
+
+
+def test_dynamic_attrs():
     test_arg = actions.arg(name='argname', default='argvalue')
     assert test_arg.type_name == 'arg'
     assert test_arg.get_attr('name') == 'argname'
@@ -61,14 +84,12 @@ def test_dynamic_attrs():
 
 def test_dynamic_create():
     assert actions.foo is not None
-
     assert actions.foo.__name__ == 'foo'
     assert actions.foo().type_name == 'foo'
+    x = actions.foo(value='bar')
+    assert x.get_attr('value') == 'bar'
 
-    with pytest.raises(AttributeError):
-        actions.node
 
-
-def test_bultin_suffix():
+def test_builtin_suffix():
     assert actions.while_.__name__ == 'while_'
     assert actions.while_().type_name == 'while_'

@@ -22,8 +22,7 @@ The available actions and substitutions are identical to XML and YAML launchfile
 Here is an example launchfile with a few features:
 
 ```py
-from launch_frontend_py import launch
-from launch_frontend_py.actions import arg, executable
+from launch_frontend_py import arg, executable, launch
 
 
 def generate_launch_description():
