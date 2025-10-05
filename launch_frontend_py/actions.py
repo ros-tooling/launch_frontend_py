@@ -41,8 +41,11 @@ def _preseed_all_actions() -> None:
     """
     Pre-seed all available actions into this module.
 
-    This is called at module load time, but will not have access to actions from plugin packages
-    (such as launch_ros) until they have been imported into the Python process.
+    This is not necessary, since __getattr__ loads actions on demand,
+    but it allows IDEs and type checkers to see the available actions.
+
+    It won't have access to actions from plugin packages (such as launch_ros)
+    until they have been imported into the Python process by the user.
     """
     from launch.frontend.expose import action_parse_methods
 
@@ -54,7 +57,7 @@ def __getattr__(name: str) -> Any:
     """
     Dynamically create action factory functions on demand.
 
-    This is called when user `from launch_frontend_py.actions import <name>`.
+    This is called in `from actions import <name>`, `getattr(actions, <name>)`, or `actions.<name>`
     """
     from launch.frontend.expose import action_parse_methods
     import importlib

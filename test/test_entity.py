@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from launch_frontend_py.actions import group, log
+from launch_frontend_py import group, log
 import pytest
 
 

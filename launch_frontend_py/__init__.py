@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List
+from typing import Any, List
 
 from launch.frontend.parser import Parser
 from launch.launch_description import LaunchDescription
@@ -27,7 +27,16 @@ def launch(actions: List[Entity]) -> LaunchDescription:
     return parser.parse_description(root_entity)
 
 
+def __getattr__(name: str) -> Any:
+    """Forward attribute access to the dynamic actions module."""
+    import importlib
+
+    if name in __all__:
+        return importlib.import_module(f'.{name}', __name__)
+
+    return getattr(actions, name)
+
+
 __all__ = [
     'launch',
-    'actions',
 ]

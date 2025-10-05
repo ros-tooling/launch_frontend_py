@@ -47,6 +47,9 @@ def test_dynamic_attrs():
     with pytest.raises(AttributeError):
         getattr(actions, 'non_existent_action')
 
+    with pytest.raises(AttributeError):
+        _ = actions.other_nonexistent
+
     test_group = actions.group()
     assert test_group.type_name == 'group'
 
