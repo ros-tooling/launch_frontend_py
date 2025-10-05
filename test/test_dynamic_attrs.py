@@ -43,16 +43,22 @@ class DynamicCreationTest(Action):
         return cls, kwargs
 
 
-def test_regular_action_load():
-    test_group = actions.group()
+def test_action_getattr():
+    group = actions.group
+    assert group.__name__ == 'group'
+    test_group = group()
     assert test_group.type_name == 'group'
 
 
-def test_dynamic_action_create():
-    name = actions.let.__name__
-    assert name == 'let'
-    str_repr = str(actions.let)
+def test_action_import():
+    from launch_frontend_py import let
+    assert let.__name__ == 'let'
+    str_repr = str(let)
     assert str_repr.startswith('<function let')
+
+    x = let(name='test_name', value='test_value')
+    assert x.get_attr('name') == 'test_name'
+    assert x.get_attr('value') == 'test_value'
 
 
 def test_invalid_action_raise():
@@ -61,6 +67,9 @@ def test_invalid_action_raise():
 
     with pytest.raises(AttributeError):
         _ = actions.other_nonexistent
+
+    with pytest.raises(ImportError):
+        import launch_frontend_py.non_existent_import  # noqa: F401
 
 
 def test_dynamic_attrs():
