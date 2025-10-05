@@ -2,8 +2,8 @@
 Changelog for package launch_frontend_py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.0 (2025-10-05)
+------------------
 * Repository created with README and LICENSE
 * CI via github actions
 * Initial implementation of package functionality, these PRs making incremental progress
